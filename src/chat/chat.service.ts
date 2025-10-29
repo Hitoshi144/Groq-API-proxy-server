@@ -50,25 +50,24 @@ export class ChatService {
       )
 
       return new Promise((resolve, reject) => {
-        let buffer = ''
-
         response.data.on('data', (chunk: Buffer) => {
-          const chunks = chunk.toString().split('\n')
-          this.logger.debug('Getted chunks:', chunks)
+          const chunkRaw = chunk.toString().split('\n')
+          this.logger.debug('Getted chunks:', chunkRaw)
 
-          for (const chunk of chunks) {
-            const line = chunk.trim()
+          for (let chunkie of chunkRaw) {
+            chunkie = chunkie.trim()
 
-            if (line === '') continue
-            if (line === 'data: [DONE]') {
+            if (chunkie === '') continue
+            if (chunkie === 'data: [DONE]') {
               resolve()
               return
             }
 
-            if (line.startsWith('data: ')) {
+            if (chunkie.startsWith('data: ')) {
               try {
-                const data = JSON.parse(line.slice(6))
-                const content = data.choices[0]?.delta?.content
+                const data = JSON.parse(chunkie.slice(6))
+                const content = data.choices.delta.content
+                this.logger.debug(`Sended chunk: ${content}`)
 
                 if (content) {
                   onChunk(content)
