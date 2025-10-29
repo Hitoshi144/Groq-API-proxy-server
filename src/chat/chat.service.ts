@@ -66,7 +66,7 @@ export class ChatService {
             if (chunkie.startsWith('data: ')) {
               try {
                 const data = JSON.parse(chunkie.slice(6))
-                const content = data.choices.delta.content
+                const content = data.choices[0].delta.content
                 this.logger.debug(`Sended chunk: ${content}`)
 
                 if (content) {
