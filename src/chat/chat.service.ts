@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import axios, { AxiosResponse } from 'axios';
@@ -7,6 +7,7 @@ import axios, { AxiosResponse } from 'axios';
 export class ChatService {
   private readonly groqClient
   private readonly apiKey?: string
+  private readonly logger = new Logger(ChatService.name)
 
   constructor() {
     this.apiKey = process.env.GROQ_API_KEY
@@ -53,6 +54,7 @@ export class ChatService {
 
         response.data.on('data', (chunk: Buffer) => {
           const chunks = chunk.toString().split('\n')
+          this.logger.debug('Getted chunks:', chunks)
 
           for (const chunk of chunks) {
             const line = chunk.trim()
