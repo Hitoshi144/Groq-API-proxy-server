@@ -72,7 +72,9 @@ export class ChatService {
                 if (content) {
                   onChunk(content)
                 }
-              } catch (e) {}
+              } catch (e) {
+                this.logger.error(`Error processing chunk: ${e}`)
+              }
             }
           }
         })
