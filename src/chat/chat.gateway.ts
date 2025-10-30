@@ -1,6 +1,7 @@
 import { WebSocketGateway, SubscribeMessage, MessageBody, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io'
+import { InitChatDto } from './dto/init-chat.dto';
 
 @WebSocketGateway({
   cors: {
@@ -46,6 +47,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         message: `Error processing your request: ${error}`
       })
     }
+  }
+
+  @SubscribeMessage('load_config')
+  loadConfig(dto: InitChatDto) {
+    return this.chatService.initializeSystemPrompt(dto)
   }
 
 }
