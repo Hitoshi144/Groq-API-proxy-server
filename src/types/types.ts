@@ -13,3 +13,22 @@ interface GroqCompletionRequest {
     stream: boolean
     stop?: any
 }
+
+interface CharacterConfig {
+    name: string
+    personality: string
+    backstory?: string
+    speechStyle: string
+    behavior: string
+}
+
+interface UserConfig {
+    name: string
+    relationship?: string
+}
+
+interface ChatContext {
+    currentSituation: string
+    location?: string
+    mood?: string
+}
