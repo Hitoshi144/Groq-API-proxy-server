@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import axios, { AxiosResponse } from 'axios';
+import { createParser } from 'eventsource-parser';
 
 @Injectable()
 export class ChatService {
@@ -49,42 +50,31 @@ export class ChatService {
       )
 
       return new Promise((resolve, reject) => {
-        response.data.on('data', (chunk: Buffer) => {
-          const chunkRaw = chunk.toString().split('\n')
-          this.logger.debug('Getted chunks:', chunkRaw)
-
-          for (let chunkie of chunkRaw) {
-            chunkie = chunkie.trim()
-
-            if (chunkie === '') continue
-            if (chunkie === 'data: [DONE]') {
+        const parser = createParser({
+          onEvent: (event) => {
+            if (event.data === '[DONE]') {
               resolve()
               return
             }
-
-            if (chunkie.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(chunkie.slice(6))
-                const content = data.choices[0].delta.content
-                this.logger.debug(`Sended chunk: ${content}`)
-
-                if (content) {
-                  onChunk(content)
-                }
-              } catch (e) {
-                this.logger.error(`Error processing chunk: ${e}`)
+            
+            try {
+              const data = JSON.parse(event.data)
+              const content = data.choices[0].delta.content
+              if (content) {
+                onChunk(content)
               }
+            } catch (e) {
+              this.logger.error(`Error parsing event: ${e}`)
             }
           }
         })
-
-        response.data.on('end', () => {
-          resolve()
+      
+        response.data.on('data', (chunk: Buffer) => {
+          parser.feed(chunk.toString())
         })
-
-        response.data.on('error', (error: Error) => {
-          reject(error)
-        })
+      
+        response.data.on('end', () => resolve())
+        response.data.on('error', reject)
       })
     } catch (error: any) {
       console.log('Groq API error: ', error)
