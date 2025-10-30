@@ -25,16 +25,16 @@ export class ChatService {
     onChunk: (chunk: string) => void
   ): Promise<void> {
     const requestData: GroqCompletionRequest = {
-      model: 'openai/gpt-oss-20b',
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       messages: [
         {
           role: 'user',
           content: message,
         }
       ],
-      temperature: 1,
-      max_completion_tokens: 8192,
-      top_p: 1,
+      temperature: 0.8,
+      max_completion_tokens: 2048,
+      top_p: 0.9,
       reasoning_effort: 'medium',
       stream: true,
       stop: null,
