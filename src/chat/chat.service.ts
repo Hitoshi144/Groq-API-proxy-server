@@ -35,7 +35,6 @@ export class ChatService {
       temperature: 0.8,
       max_completion_tokens: 2048,
       top_p: 0.9,
-      reasoning_effort: 'medium',
       stream: true,
       stop: null,
     }
