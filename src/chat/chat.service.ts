@@ -36,6 +36,8 @@ export class ChatService {
   public initializeSystemPrompt(initDto: InitChatDto): void {
     const systemPrompt = this.createSystemPrompt(initDto);
     this.logger.debug(`dto: ${initDto}`)
+
+    this.logger.debug(`proccessed dto: ${JSON.stringify(initDto)}`)
     
     this.conversationHistory = [
       {

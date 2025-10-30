@@ -50,7 +50,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('load_config')
-  loadConfig(dto: InitChatDto) {
+  loadConfig(@MessageBody() dto: InitChatDto) {
     return this.chatService.initializeSystemPrompt(dto)
   }
 
