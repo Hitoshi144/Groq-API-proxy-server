@@ -25,23 +25,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('send_message')
   async handleMessage(client: Socket, message: string) {
     try {
-      let counter = 0
+      let sentenceCounter = 0
       console.log(`Received message: ${message}`)
 
       client.emit('response_start', { status: 'started' })
 
-      await this.chatService.streamCompletion(message, (chunk) => {
+      await this.chatService.streamCompletion(message, (sentence, isFinal) => {
         client.emit('response_chunk', {
-          content: chunk,
-          done: false
+          content: sentence,
+          isFinal,
+          done: false,
+          sequence: sentenceCounter
         })
-        console.log(`${counter} Chunk sended: ${chunk}`)
-        counter += 1
+        console.log(`${sentenceCounter} Sentence sended: "${sentence}" ${isFinal ? '(FINAL)' : ''}`)
+        sentenceCounter += 1
       })
 
       client.emit('response_chunk', {
         content: '',
-        done: true
+        done: true,
+        isFinal: true
       })
     }
     catch (error: any) {

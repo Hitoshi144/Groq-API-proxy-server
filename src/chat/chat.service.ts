@@ -128,7 +128,7 @@ ${this.chatRules}`;
 
   async streamCompletion(
     message: string,
-    onChunk: (chunk: string) => void
+    onSentence: (sentence: string, isFinal: boolean) => void
   ): Promise<void> {
     if (!this.isInited) {
       throw new Error('Chat service not inited...')
@@ -149,7 +149,8 @@ ${this.chatRules}`;
       stop: null,
     }
 
-    let fullResponse = ''
+    let accumulatedText = ''
+    let buffer = ''
 
     try {
       const response: AxiosResponse = await this.groqClient.post(
@@ -164,9 +165,12 @@ ${this.chatRules}`;
         const parser = createParser({
           onEvent: (event) => {
             if (event.data === '[DONE]') {
-              if (fullResponse) {
-                this.addAssistantMessage(fullResponse)
-                fullResponse = ''
+              if (buffer.trim()) {
+                onSentence(buffer.trim(), false)
+              }
+              if (accumulatedText) {
+                this.addAssistantMessage(accumulatedText)
+                accumulatedText = ''
               }
               resolve()
               return
@@ -176,8 +180,17 @@ ${this.chatRules}`;
               const data = JSON.parse(event.data)
               const content = data.choices[0].delta.content
               if (content) {
-                fullResponse += content
-                onChunk(content)
+                accumulatedText += content
+                buffer += content
+
+                const sentences = this.extractCompleteSentences(buffer)
+
+                if (sentences.complete.length > 0) {
+                  sentences.complete.forEach(sentence => {
+                    onSentence(sentence, false)
+                  })
+                  buffer = sentences.remaining
+                }
               }
             } catch (e) {
               this.logger.error(`Error parsing event: ${e}`)
@@ -190,11 +203,14 @@ ${this.chatRules}`;
         })
       
         response.data.on('end', () => {
-          if (fullResponse) {
-            this.addAssistantMessage(fullResponse)
-            fullResponse = ''
-            resolve()
+          if (buffer.trim()) {
+            onSentence(buffer.trim(), true)
           }
+          if (accumulatedText) {
+            this.addAssistantMessage(accumulatedText)
+            accumulatedText = ''
+          }
+          resolve()
         })
         response.data.on('error', reject)
       })
@@ -202,5 +218,31 @@ ${this.chatRules}`;
       console.log('Groq API error: ', error)
       throw new Error(`Failed to get response from Groq API: ${error}`)
     }
+  }
+
+  private extractCompleteSentences(text): { complete: string[], remaining: string } {
+    const sentenceEnders = ['. ', '! ', '? ']
+    let remaining = text
+    const complete: string[] = []
+
+    let found = true
+    while (found) {
+      found = false
+
+      for (const ender of sentenceEnders) {
+        const index = remaining.indexOf(ender)
+        if (index !== -1) {
+          const sentence = remaining.substring(0, index + 1).trim()
+          if (sentence.length > 2) {
+            complete.push(sentence)
+          }
+          remaining = remaining.substring(index + 2)
+          found = true
+          break
+        }
+      }
+    }
+
+    return { complete, remaining}
   }
 }
