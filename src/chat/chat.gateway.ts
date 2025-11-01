@@ -25,6 +25,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('send_message')
   async handleMessage(client: Socket, message: string) {
     try {
+      let counter = 0
       console.log(`Received message: ${message}`)
 
       client.emit('response_start', { status: 'started' })
@@ -34,6 +35,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           content: chunk,
           done: false
         })
+        console.log(`${counter} Chunk sended: ${chunk}`)
+        counter += 1
       })
 
       client.emit('response_chunk', {
