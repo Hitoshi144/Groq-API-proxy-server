@@ -204,7 +204,8 @@ ${this.chatRules}`;
       
         response.data.on('end', () => {
           if (buffer.trim()) {
-            onSentence(buffer.trim(), true)
+            // onSentence(buffer.trim(), true)
+            this.logger.debug(`Last sendence ignored: ${buffer.trim()}`)
           }
           if (accumulatedText) {
             this.addAssistantMessage(accumulatedText)
@@ -244,5 +245,10 @@ ${this.chatRules}`;
     }
 
     return { complete, remaining}
+  }
+
+  clearHistory() {
+    this.conversationHistory.filter(msg => msg.role == 'system')
+    this.logger.log(`Chat history cleared!`)
   }
 }

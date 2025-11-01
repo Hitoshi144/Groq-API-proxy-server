@@ -60,4 +60,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.chatService.initializeSystemPrompt(dto)
   }
 
+  @SubscribeMessage('clear_history')
+  clearHistory() {
+    return this.chatService.clearHistory()
+  }
 }
