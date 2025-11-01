@@ -205,6 +205,10 @@ ${this.chatRules}`;
         response.data.on('end', () => {
           if (buffer.trim()) {
             // onSentence(buffer.trim(), true)
+            this.logger.debug(`Current chat history:\n ${this.conversationHistory.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            }))}`)
             this.logger.debug(`Last sendence ignored: ${buffer.trim()}`)
           }
           if (accumulatedText) {
