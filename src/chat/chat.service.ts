@@ -142,9 +142,9 @@ ${this.chatRules}`;
         role: msg.role,
         content: msg.content,
       })),
-      temperature: 0.8,
-      max_completion_tokens: 1024,
-      top_p: 0.9,
+      temperature: 0.9,
+      max_completion_tokens: 512,
+      top_p: 0.95,
       stream: true,
       stop: null,
     }
