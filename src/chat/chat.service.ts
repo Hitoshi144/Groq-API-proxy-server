@@ -143,7 +143,7 @@ ${this.chatRules}`;
         content: msg.content,
       })),
       temperature: 0.8,
-      max_completion_tokens: 2048,
+      max_completion_tokens: 1024,
       top_p: 0.9,
       stream: true,
       stop: null,
@@ -205,10 +205,11 @@ ${this.chatRules}`;
         response.data.on('end', () => {
           if (buffer.trim()) {
             // onSentence(buffer.trim(), true)
-            this.logger.debug(`Current chat history:\n ${this.conversationHistory.map(msg => ({
+            const history = this.conversationHistory.map(msg => ({
               role: msg.role,
               content: msg.content
-            }))}`)
+            }))
+            this.logger.debug(`Current chat history:\n ${JSON.stringify(history)}`)
             this.logger.debug(`Last sendence ignored: ${buffer.trim()}`)
           }
           if (accumulatedText) {
