@@ -1,4 +1,4 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, MessageBody, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer, ConnectedSocket } from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io'
 import { InitChatDto } from './dto/init-chat.dto';
@@ -23,7 +23,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('send_message')
-  async handleMessage(client: Socket, @MessageBody() data: {message: string, facts: string}) {
+  async handleMessage(@ConnectedSocket() client: Socket, @MessageBody() data: {message: string, facts: string}) {
     try {
       const {message, facts} = data
       let sentenceCounter = 0
