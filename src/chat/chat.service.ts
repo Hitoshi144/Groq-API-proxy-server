@@ -115,6 +115,13 @@ ${this.chatRules}`;
     this.logger.debug(`Message added to history: ${message.substring(0, 50)}...`)
   }
 
+  private addMemoryMessage(facts: string): void {
+    this.conversationHistory.push({
+      role: 'system',
+      content: `Вот некоторые данные из твоей памяти:\n${facts}`
+    })
+  }
+
   private trimConversationHistory(): void {
     const MAX_HISTORY_LENGTH = 30
 
@@ -128,10 +135,15 @@ ${this.chatRules}`;
 
   async streamCompletion(
     message: string,
+    facts: string,
     onSentence: (sentence: string, isFinal: boolean) => void
   ): Promise<void> {
     if (!this.isInited) {
       throw new Error('Chat service not inited...')
+    }
+
+    if (facts && facts !== '') {
+      this.addMemoryMessage(facts)
     }
 
     this.addUserMessage(message)

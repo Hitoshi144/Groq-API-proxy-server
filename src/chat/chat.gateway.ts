@@ -23,14 +23,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('send_message')
-  async handleMessage(client: Socket, message: string) {
+  async handleMessage(client: Socket, message: string, facts: string) {
     try {
       let sentenceCounter = 0
       console.log(`Received message: ${message}`)
 
+      if (facts && facts !== '') {
+        console.log(`Recieved facts:\n${facts}`)
+      }
+
       client.emit('response_start', { status: 'started' })
 
-      await this.chatService.streamCompletion(message, (sentence, isFinal) => {
+      await this.chatService.streamCompletion(message, facts, (sentence, isFinal) => {
         client.emit('response_chunk', {
           content: sentence,
           isFinal,
