@@ -23,8 +23,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('send_message')
-  async handleMessage(client: Socket, message: string, facts: string) {
+  async handleMessage(client: Socket, @MessageBody() data: {message: string, facts: string}) {
     try {
+      const {message, facts} = data
       let sentenceCounter = 0
       console.log(`Received message: ${message}`)
 
